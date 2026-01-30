@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import os
 
 import mhn.model
 from mhn.mcmc import kernels
@@ -19,12 +20,19 @@ parser.add_argument(
 parser.add_argument(
     "--kernel", help="Kernel name, one of 'MALA', 'RWM', 'smMALA'. "
     "Defaults to 'MALA'")
+parser.add_argument(
+    "--step_size", help="Step size for the kernel. Defaults to 'auto'")
 
 args = parser.parse_args()
 
 data_name = args.data_name
 prior = args.prior if args.prior else "symsparse"
 kernel_name = args.kernel if args.kernel else "MALA"
+step_size = args.step_size if args.step_size else "auto"
+try:
+    step_size = float(step_size)
+except ValueError:
+    pass
 
 kernel = {
     "MALA": kernels.MALAKernel,
@@ -50,12 +58,18 @@ mcmc_sampler = MCMC(
     data=data,
     penalty=penalty,
     kernel_class=kernel,
+    step_size=step_size,
     thin=100,
 )
 
-mcmc_sampler.run()
+output_name = f"results/mcmc/{data_name}_{prior}_{kernel_name}_" \
+    f"{str(mcmc_sampler.step_size).replace('.', '_')}.npy"
 
+if os.path.isfile(output_name):
+    mcmc_sampler.log_thetas = np.load(output_name)
+mcmc_sampler.run(max_steps=200000)
+
+    
 np.save(
-    f"results/mcmc/{data_name}_{prior}_{kernel_name}_"
-    f"{str(mcmc_sampler.step_size).replace('.', '_')}.npy",
+    output_name,
     mcmc_sampler.log_thetas)

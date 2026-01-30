@@ -2,10 +2,25 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import Optional
+from cycler import cycler
+
 
 mpl.rcParams["mathtext.fontset"] = "stix"
 mpl.rcParams["font.family"] = "STIXGeneral"
 mpl.rcParams["font.size"] = 6.02249
+
+
+
+okabe_ito_colors ={
+    # "yellow": "#f0e442",
+    "green": "#009e74",
+    "blue": "#56b3e9",
+    # "pink": "#cc79a7",
+    "orange": "#d55e00",
+    # "eggyolk": "#e69f00",
+}
+cmap = mpl.colors.ListedColormap(okabe_ito_colors.values())
+mpl.rcParams["axes.prop_cycle"] = cycler("color", okabe_ito_colors.values())
 
 def plot_theta_dist(
     quantiles: np.ndarray,
