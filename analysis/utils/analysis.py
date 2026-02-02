@@ -47,3 +47,40 @@ def event_risks(log_thetas: np.ndarray, data: pd.DataFrame,
         data.columns.tolist(), sort=False).ngroup()]
 
     return probs
+
+
+def _sample_positions(log_theta, trajectory_num: int, n_bins: int):
+
+    model = mhn.model.oMHN(log_theta.reshape(13, 12))
+
+    position_counts = np.zeros((12, n_bins))
+    bin_range = np.arange(n_bins)
+
+    for trajectory in model.sample_trajectories(
+            trajectory_num=trajectory_num)[0]:
+        _len = len(trajectory)
+        if _len == 0:
+            continue
+        position_counts[np.repeat(
+            trajectory, (n_bins - 1) // _len + 1)[:n_bins], bin_range] += 1
+
+    return position_counts
+
+
+def event_positions(log_thetas: np.ndarray, n_samples: int = 1000,
+                    trajectory_num: int = 50_000, n_bins: int = 100):
+
+    positions = np.empty((n_samples, 12, n_bins))
+
+    log_theta_samples = log_thetas[np.random.choice(
+        log_thetas.shape[0], n_samples)]
+
+    with mp.Pool(processes=mp.cpu_count()) as pool:
+        results = pool.starmap(_sample_positions, [(
+            log_theta, trajectory_num, n_bins)
+            for log_theta in log_theta_samples])
+        
+    for j, position_counts in enumerate(results):
+        positions[j, :, :] = position_counts
+
+    return positions
