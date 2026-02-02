@@ -49,7 +49,7 @@ penalty = {
 }[prior]
 
 data = np.loadtxt(f"data/{data_name}.csv", delimiter=",", skiprows=1,
-                  dtype=np.int32)
+                  usecols=range(1, 13), dtype=np.int32)
 mhn_model = mhn.model.oMHN.load(
     f"results/mhns/{data_name}_{prior}_mle.csv")
 
