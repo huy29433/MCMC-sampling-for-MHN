@@ -65,11 +65,8 @@ mcmc_sampler = MCMC(
 output_name = f"results/mcmc/{data_name}_{prior}_{kernel_name}_" \
     f"{str(mcmc_sampler.step_size).replace('.', '_')}.npy"
 
-if os.path.isfile(output_name):
-    mcmc_sampler.log_thetas = np.load(output_name)
-mcmc_sampler.run(max_steps=200000)
+mcmc_sampler.run()
 
-    
 np.save(
     output_name,
     mcmc_sampler.log_thetas)
