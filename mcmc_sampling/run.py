@@ -7,7 +7,7 @@ from mhn.mcmc import kernels
 from mhn.mcmc.mcmc import MCMC
 from mhn.optimizers import Penalty
 
-from utils import l2_sym
+from utils import sym_l2
 
 
 parser = argparse.ArgumentParser(description="Run MCMC sampler")
@@ -43,9 +43,9 @@ kernel = {
 penalty = {
     "symsparse": Penalty.SYM_SPARSE,
     "l1": Penalty.L1,
-    "sym-l2": (l2_sym.gaussian_sym_log_prior,
-               l2_sym.gaussian_sym_log_prior_grad,
-               l2_sym.gaussian_sym_log_prior_hessian)
+    "sym-l2": (sym_l2.sym_l2,
+               sym_l2.sym_l2_grad,
+               sym_l2.sym_l2_hessian)
 }[prior]
 
 data = np.loadtxt(f"data/{data_name}.csv", delimiter=",", skiprows=1,
@@ -59,7 +59,7 @@ mcmc_sampler = MCMC(
     penalty=penalty,
     kernel_class=kernel,
     step_size=step_size,
-    thin=100,
+    seed=0,
 )
 
 output_name = f"results/mcmc/{data_name}_{prior}_{kernel_name}_" \
