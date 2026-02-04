@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from typing import Optional
 from cycler import cycler
-
+import warnings
 
 mpl.rcParams["mathtext.fontset"] = "stix"
 mpl.rcParams["font.family"] = "STIXGeneral"
@@ -42,13 +42,32 @@ def plot_theta_dist(
 
     br_mask = np.repeat(np.eye(n_events if cmhn else n_events +
                         1, n_events, dtype=bool), tile_len, axis=1)
+    
+
+    _min_br, _max_br = min_max_br(quantiles, tile_len)
+    _abs_max_ir = max_abs_ir(quantiles, tile_len)
 
     if abs_max_ir is None:
-        abs_max_ir = np.abs(quantiles[~br_mask]).max()
+        abs_max_ir = _abs_max_ir
+    elif abs_max_ir < _abs_max_ir:
+        warnings.warn(
+            f"Provided abs_max_ir {abs_max_ir} is smaller than "
+            f"calculated maximum {_abs_max_ir}. "
+        )
     if min_br is None:
-        min_br = quantiles[br_mask].min()
+        min_br = _min_br
+    elif min_br > _min_br:
+        warnings.warn(
+            f"Provided min_br {min_br} is larger than "
+            f"calculated minimum {_min_br}. "
+        )
     if max_br is None:
-        max_br = quantiles[br_mask].max()
+        max_br = _max_br
+    elif max_br < _max_br:
+        warnings.warn(
+            f"Provided max_br {max_br} is smaller than "
+            f"calculated maximum {_max_br}. "
+        )
     if events is None:
         events = np.arange(n_events).tolist()
 
@@ -114,8 +133,14 @@ def plot_theta_var(
     linewidth: float = 0.3,
 ):
 
+    _max_var = variances.max()
     if max_var is None:
-        max_var = variances.max()
+        max_var = _max_var
+    elif max_var < _max_var:
+        warnings.warn(
+            f"Provided max_var {max_var} is smaller than "
+            f"calculated maximum {_max_var}. "
+        )
 
     if events is None:
         events = np.arange(n_events).tolist()
