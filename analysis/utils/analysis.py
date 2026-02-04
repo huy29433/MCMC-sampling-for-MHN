@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import mhn
 import multiprocessing as mp
+from typing import Literal
 
 
 def _sample_risks(log_theta, trajectory_num: int, data: pd.DataFrame):
@@ -25,15 +26,20 @@ def _sample_risks(log_theta, trajectory_num: int, data: pd.DataFrame):
 
 
 def event_risks(log_thetas: np.ndarray, data: pd.DataFrame,
-                n_samples: int = 1000, trajectory_num: int = 100):
+                n_samples: int | Literal["all"] = 1000,
+                trajectory_num: int = 100):
 
     patients_unique = data.drop_duplicates()
     n_events = data.shape[1]
 
-    probs_unique = np.zeros((patients_unique.shape[0], n_samples, n_events))
+    if n_samples == "all":
+        n_samples = log_thetas.shape[0]
+        log_theta_samples = log_thetas
+    else:
+        log_theta_samples = log_thetas[np.random.choice(
+            log_thetas.shape[0], n_samples)]
 
-    log_theta_samples = log_thetas[np.random.choice(
-        log_thetas.shape[0], n_samples)]
+    probs_unique = np.zeros((patients_unique.shape[0], n_samples, n_events))
 
     with mp.Pool(processes=mp.cpu_count()) as pool:
         results = pool.starmap(_sample_risks, [(
@@ -67,19 +73,24 @@ def _sample_positions(log_theta, trajectory_num: int, n_bins: int):
     return position_counts
 
 
-def event_positions(log_thetas: np.ndarray, n_samples: int = 1000,
+def event_positions(log_thetas: np.ndarray,
+                    n_samples: int | Literal["all"] = 100,
                     trajectory_num: int = 50_000, n_bins: int = 100):
 
-    positions = np.empty((n_samples, 12, n_bins))
+    if n_samples == "all":
+        n_samples = log_thetas.shape[0]
+        log_theta_samples = log_thetas
+    else:
+        log_theta_samples = log_thetas[np.random.choice(
+            log_thetas.shape[0], n_samples)]
 
-    log_theta_samples = log_thetas[np.random.choice(
-        log_thetas.shape[0], n_samples)]
+    positions = np.empty((n_samples, 12, n_bins))
 
     with mp.Pool(processes=mp.cpu_count()) as pool:
         results = pool.starmap(_sample_positions, [(
             log_theta, trajectory_num, n_bins)
             for log_theta in log_theta_samples])
-        
+
     for j, position_counts in enumerate(results):
         positions[j, :, :] = position_counts
 
