@@ -10,17 +10,17 @@ mpl.rcParams["font.family"] = "STIXGeneral"
 mpl.rcParams["font.size"] = 6.02249
 
 
-
-okabe_ito_colors ={
-    # "yellow": "#f0e442",
+okabe_ito_colors = {
     "green": "#009e74",
     "blue": "#56b3e9",
-    # "pink": "#cc79a7",
     "orange": "#d55e00",
-    # "eggyolk": "#e69f00",
+    "pink": "#cc79a7",
+    "eggyolk": "#e69f00",
+    "yellow": "#f0e442",
 }
 cmap = mpl.colors.ListedColormap(okabe_ito_colors.values())
 mpl.rcParams["axes.prop_cycle"] = cycler("color", okabe_ito_colors.values())
+
 
 def plot_theta_dist(
     quantiles: np.ndarray,
@@ -42,7 +42,6 @@ def plot_theta_dist(
 
     br_mask = np.repeat(np.eye(n_events if cmhn else n_events +
                         1, n_events, dtype=bool), tile_len, axis=1)
-    
 
     _min_br, _max_br = min_max_br(quantiles, tile_len)
     _abs_max_ir = max_abs_ir(quantiles, tile_len)
@@ -81,7 +80,7 @@ def plot_theta_dist(
                     quantiles[i, j * tile_len: (j+1)
                               * tile_len].reshape(1, -1),
                     extent=(0, 1, j + j * border_len, j+1 + j * border_len),
-                    cmap="Greens", vmin=min_br, vmax=max_br,
+                    cmap=OI_Greens, vmin=min_br, vmax=max_br,
                     interpolation="None")
                 ax.add_patch(mpl.patches.Rectangle(
                     (0,
@@ -99,7 +98,7 @@ def plot_theta_dist(
                         i + i * border_len,
                         i+1 + i * border_len
                     ),
-                    cmap="RdBu_r",
+                    cmap=OI_RdBu,
                     vmin=-abs_max_ir,
                     vmax=abs_max_ir,
                     interpolation="None"
@@ -124,7 +123,7 @@ def plot_theta_dist(
 def plot_theta_var(
     variances: np.ndarray,
     n_events: int,
-    cmhn: bool=False,
+    cmhn: bool = False,
     border_len: float = 0.1,
     br_ir_sep: float = 0.2,
     max_var: Optional[float] = None,
@@ -209,6 +208,39 @@ def max_abs_ir(quantiles: np.ndarray, tile_len: int) -> float:
     br_mask = np.eye(quantiles.shape[0],
                      quantiles.shape[1] // tile_len, dtype=bool)
     br_mask = np.repeat(br_mask, tile_len, axis=1)
-    
+
     return np.abs(quantiles[~br_mask]).max()
 
+
+def darken(color, factor=0.75):
+    rgb = mpl.colors.to_rgb(color)
+    return tuple(factor * c for c in rgb)
+
+
+def lighten(color, factor=0.8):
+    """Return a lighter version of a color (factor=1.0 returns original)."""
+    rgb = mpl.colors.to_rgb(color)
+    return tuple(c + (1-c)*factor for c in rgb)
+
+
+OI_Greens = mpl.colors.LinearSegmentedColormap.from_list(
+    "OI_Greens",
+    [
+        lighten(okabe_ito_colors["green"], 0.9),
+        okabe_ito_colors["green"],
+        darken(okabe_ito_colors["green"], 0.3),
+    ],
+    N=256
+)
+
+OI_RdBu = mpl.colors.LinearSegmentedColormap.from_list(
+    "OI_RdBu",
+    [
+        darken(okabe_ito_colors["blue"], 0.7),
+        okabe_ito_colors["blue"],
+        "white",
+        okabe_ito_colors["orange"],
+        darken(okabe_ito_colors["orange"], 0.7),
+    ],
+    N=256
+)
