@@ -62,10 +62,16 @@ mcmc_sampler = MCMC(
     seed=0,
 )
 
-output_name = f"results/mcmc/{data_name}_{prior}_{kernel_name}_" \
-    f"{str(mcmc_sampler.step_size).replace('.', '_')}.npy"
+if prior == "sym-l2":
+    np.random.seed(0)
+    mcmc_sampler.initial_step = np.random.normal(
+        size=(mcmc_sampler.n_chains, 1, mcmc_sampler.size),
+        scale=1 / np.sqrt(2 * mcmc_sampler.lam))
+
 
 mcmc_sampler.run()
+output_name = f"results/mcmc/{data_name}_{prior}_{kernel_name}_" \
+    f"{str(mcmc_sampler.step_size).replace('.', '_')}.npy"
 
 np.save(
     output_name,

@@ -2,7 +2,7 @@ import numpy as np
 
 n = 12
 
-def gaussian_sym_log_prior(log_theta: np.ndarray) -> float:
+def sym_l2(log_theta: np.ndarray) -> float:
     """Computes a gaussian version of the sym_sparse prior density.
 
     Args:
@@ -35,7 +35,7 @@ def gaussian_sym_log_prior(log_theta: np.ndarray) -> float:
     return prior
 
 
-def gaussian_sym_log_prior_grad(
+def sym_l2_grad(
     log_theta: np.array,
 ) -> np.ndarray:
     """Computes the gradient of the symmetric l2 prior
@@ -69,7 +69,7 @@ hessian[hessian_row_indices, hessian_col_indices] = -1
 hessian[hessian_col_indices, hessian_row_indices] = -1
 
 
-def gaussian_sym_log_prior_hessian(
+def sym_l2_hessian(
     log_theta: np.ndarray,
 ) -> np.ndarray:
     """Computes the Hessian of the gaussian sym_sparse log prior density.
