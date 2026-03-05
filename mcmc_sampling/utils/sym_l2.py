@@ -8,9 +8,6 @@ author: Y. Linda Hu
 import numpy as np
 
 
-n = 12
-
-
 def sym_l2(log_theta: np.ndarray) -> float:
     """Computes a gaussian version of the sym_sparse prior density.
 
@@ -22,6 +19,8 @@ def sym_l2(log_theta: np.ndarray) -> float:
         + sum(theta_ii^2)
         (+ sum(omega_i^2)))
     """
+    n = int(np.sqrt(log_theta.size))
+
     _log_theta = log_theta.copy().reshape(n + 1, n)
 
     log_theta_no_diag = _log_theta[:n].copy()
@@ -56,6 +55,7 @@ def sym_l2_grad(
     Returns:
         np.ndarray: Gradient of the log prior density
     """
+    n = int(np.sqrt(log_theta.size))
 
     _log_theta = log_theta.reshape(n + 1, n)
     grad = 2 * _log_theta
@@ -65,17 +65,6 @@ def sym_l2_grad(
 
     return grad
 
-
-hessian = np.eye(n**2 + n) * 2
-
-# get all off-diagonal indices
-theta_off_diag_indices = np.triu_indices(n, k=1)
-hessian_row_indices = np.ravel_multi_index(
-    theta_off_diag_indices, (n, n))
-hessian_col_indices = np.ravel_multi_index(
-    theta_off_diag_indices[::-1], (n, n))
-hessian[hessian_row_indices, hessian_col_indices] = -1
-hessian[hessian_col_indices, hessian_row_indices] = -1
 
 
 def sym_l2_hessian(
@@ -87,5 +76,18 @@ def sym_l2_hessian(
     Returns:
         np.ndarray: Hessian of the log prior density
     """
+    
+    n = int(np.sqrt(log_theta.size))
+
+    hessian = np.eye(n**2 + n) * 2
+
+    # get all off-diagonal indices
+    theta_off_diag_indices = np.triu_indices(n, k=1)
+    hessian_row_indices = np.ravel_multi_index(
+        theta_off_diag_indices, (n, n))
+    hessian_col_indices = np.ravel_multi_index(
+        theta_off_diag_indices[::-1], (n, n))
+    hessian[hessian_row_indices, hessian_col_indices] = -1
+    hessian[hessian_col_indices, hessian_row_indices] = -1
 
     return hessian

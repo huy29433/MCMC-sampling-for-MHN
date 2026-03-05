@@ -32,10 +32,12 @@ def _sample_risks(
         np.ndarray: Array of risks to develop a mutation. Rows are
             patients, columns events.
     """
-    np.random.seed(seed)
-    occurences = np.zeros((data.shape[0], 12), dtype=int)
+    n_events = data.shape[1]
 
-    model = mhn.model.oMHN(log_theta.reshape(13, 12))
+    np.random.seed(seed)
+    occurences = np.zeros((data.shape[0], n_events), dtype=int)
+
+    model = mhn.model.oMHN(log_theta.reshape(n_events + 1, n_events))
 
     for i, (_, state) in enumerate(data.iterrows()):
 
@@ -116,9 +118,11 @@ def _sample_positions(log_theta: np.ndarray, trajectory_num: int, n_bins: int,
     Returns:
         np.ndarray: Array (n_events, n_bins) of counts per bin.
     """
-    model = mhn.model.oMHN(log_theta.reshape(13, 12))
+    n_events = int(np.sqrt(log_theta.size))
 
-    position_counts = np.zeros((12, n_bins))
+    model = mhn.model.oMHN(log_theta.reshape(n_events + 1, n_events))
+
+    position_counts = np.zeros((n_events, n_bins))
     bin_range = np.arange(n_bins)
 
     np.random.seed(seed)
@@ -151,6 +155,7 @@ def event_positions(log_thetas: np.ndarray,
         np.ndarray: Array (n_samples, n_events, n_bins) of counts per
             event, bin and log_theta sample.
     """
+    n_events = int(np.sqrt(log_thetas.shape[-1]))
 
     if n_samples == "all":
         n_samples = log_thetas.shape[0]
@@ -159,7 +164,7 @@ def event_positions(log_thetas: np.ndarray,
         log_theta_samples = log_thetas[np.random.choice(
             log_thetas.shape[0], n_samples)]
 
-    positions = np.empty((n_samples, 12, n_bins))
+    positions = np.empty((n_samples, n_events, n_bins))
 
     with mp.Pool(processes=mp.cpu_count()) as pool:
         results = pool.starmap(_sample_positions, [(
