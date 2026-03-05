@@ -8,8 +8,8 @@ This directory contains Jupyter notebooks to reproduce all results and figures f
 - [_event_positions.ipynb_](event_positions.ipynb) contains estimation of temporal event positions (fig.s 3B, 4B).
 - [_example_parameter_matrix.ipynb_](example_parameter_matrix.ipynb) contains estimation of temporal event positions (fig. 1).
 - [_mutation_risk.ipynb_](mutation_risk.ipynb) contains estimation of mutation risks and survival (fig.s 3C, 3D, 4C, 4D, and supplementary fig.s SF1, SF2).
-- [_param_disk.ipynb_](param_disk.ipynb) contains the plotting of the paramter matrices and principal component analyses (fig.s 3A, 4A, and supplementary fig.s SF3-SF6).
-- [_sampler_metric.ipynb_](param_disk.ipynb) contains the calculation of the MCMC metrics (table 1).
+- [_param_dist.ipynb_](param_dist.ipynb) contains the plotting of the paramter matrices and principal component analyses (fig.s 3A, 4A, and supplementary fig.s SF3-SF6).
+- [_sampler_metric.ipynb_](sampler_metric.ipynb) contains the calculation of the MCMC metrics (table 1).
 
 ## Important Notes
 
