@@ -7,7 +7,7 @@ This repository contains:
 
 - In [analysis](analysis) the scripts and utitlities to perform the analyses and produce the figures, including utilities.
 - In [data](data) the patient mutation and metadata on which the analyses were performed.
-- In [docs](docs) the manuscript.
+- In [docs](docs) the manuscript and supplementary.
 - In [mcmc_sampling](mcmc_sampling) the script to run the sampling, including utilities beyond the [`mhn`](https://github.com/spang-lab/LearnMHN) package.
 - In [results](results) the Maximum-Likelihood models, the posterior sampling results and the produced figures.
 
