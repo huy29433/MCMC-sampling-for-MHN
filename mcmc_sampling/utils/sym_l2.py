@@ -1,6 +1,15 @@
+"""
+This module contains the sym-L2 penalty and its first and second
+derivative.
+
+author: Y. Linda Hu
+"""
+
 import numpy as np
 
+
 n = 12
+
 
 def sym_l2(log_theta: np.ndarray) -> float:
     """Computes a gaussian version of the sym_sparse prior density.

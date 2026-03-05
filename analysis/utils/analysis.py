@@ -1,3 +1,10 @@
+"""
+This module contains the functionalities to create predictions from (a
+random subset of) a set of log_thetas.
+
+author: Y. Linda Hu
+"""
+
 import numpy as np
 import pandas as pd
 import mhn
@@ -6,7 +13,8 @@ from typing import Literal
 
 
 def _sample_risks(
-        log_theta: np.ndarray, trajectory_num: int, data: pd.DataFrame
+        log_theta: np.ndarray, trajectory_num: int, data: pd.DataFrame,
+        seed: int
 ) -> np.ndarray:
     """Estimate the risks for patients to develop a mutation according 
     to an MHN through sampling.
@@ -17,11 +25,14 @@ def _sample_risks(
             the risk.
         data (pd.DataFrame): Dataframe of binary patient data. Patients
             are rows, columns the events.
+        seed (int): random seed for trajectory sampling.
+
 
     Returns:
         np.ndarray: Array of risks to develop a mutation. Rows are
             patients, columns events.
     """
+    np.random.seed(seed)
     occurences = np.zeros((data.shape[0], 12), dtype=int)
 
     model = mhn.model.oMHN(log_theta.reshape(13, 12))
@@ -75,8 +86,10 @@ def event_risks(log_thetas: np.ndarray, data: pd.DataFrame,
 
     with mp.Pool(processes=mp.cpu_count()) as pool:
         results = pool.starmap(_sample_risks, [(
-            log_theta, trajectory_num, patients_unique)
-            for log_theta in log_theta_samples])
+            log_theta, trajectory_num, patients_unique, seed)
+            for log_theta, seed in zip(
+                log_theta_samples,
+                np.random.randint(0, 2**31, size=n_samples))])
 
     for j, risks in enumerate(results):
         probs_unique[:, j, :] = risks
@@ -87,7 +100,8 @@ def event_risks(log_thetas: np.ndarray, data: pd.DataFrame,
     return probs
 
 
-def _sample_positions(log_theta: np.ndarray, trajectory_num: int, n_bins: int
+def _sample_positions(log_theta: np.ndarray, trajectory_num: int, n_bins: int,
+                      seed: int
                       ) -> np.ndarray:
     """Estimate the temporal event positions according to an MHN through
     sampling.
@@ -97,6 +111,8 @@ def _sample_positions(log_theta: np.ndarray, trajectory_num: int, n_bins: int
         trajectory_num (int): Number of trajectories to sample to infer
             the risk.
         n_bins (int): number of position bins.
+        seed (int): random seed for trajectory sampling.
+
     Returns:
         np.ndarray: Array (n_events, n_bins) of counts per bin.
     """
@@ -105,6 +121,7 @@ def _sample_positions(log_theta: np.ndarray, trajectory_num: int, n_bins: int
     position_counts = np.zeros((12, n_bins))
     bin_range = np.arange(n_bins)
 
+    np.random.seed(seed)
     for trajectory in model.sample_trajectories(
             trajectory_num=trajectory_num)[0]:
         _len = len(trajectory)
@@ -146,8 +163,11 @@ def event_positions(log_thetas: np.ndarray,
 
     with mp.Pool(processes=mp.cpu_count()) as pool:
         results = pool.starmap(_sample_positions, [(
-            log_theta, trajectory_num, n_bins)
-            for log_theta in log_theta_samples])
+            log_theta, trajectory_num, n_bins, seed)
+            for log_theta, seed in zip(
+                log_theta_samples,
+                np.random.randint(0, 2**31, size=n_samples)
+        )])
 
     for j, position_counts in enumerate(results):
         positions[j, :, :] = position_counts
