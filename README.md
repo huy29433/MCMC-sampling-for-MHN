@@ -1,5 +1,6 @@
 # MCMC-sampling-for-MHN
-Here, the results of the manuscript [_Quantifying Uncertainty of Predictions from Cancer Progression Models_](docs/Quantifying_Uncertainty_of_Predictions_from_Cancer_Progression_Models.pdf) are reproduced.
+
+This repository contains the data and the scripts to reproduce the results and figures of the manuscript [_Quantifying Uncertainty of Predictions from Cancer Progression Models_](docs/Quantifying_Uncertainty_of_Predictions_from_Cancer_Progression_Models.pdf).
 
 ## Contents
 
