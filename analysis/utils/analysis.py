@@ -5,8 +5,23 @@ import multiprocessing as mp
 from typing import Literal
 
 
-def _sample_risks(log_theta, trajectory_num: int, data: pd.DataFrame):
+def _sample_risks(
+        log_theta: np.ndarray, trajectory_num: int, data: pd.DataFrame
+) -> np.ndarray:
+    """Estimate the risks for patients to develop a mutation according 
+    to an MHN through sampling.
 
+    Args:
+        log_theta (np.ndarray): Logarithmic theta values of the MHN.
+        trajectory_num (int): Number of trajectories to sample to infer
+            the risk.
+        data (pd.DataFrame): Dataframe of binary patient data. Patients
+            are rows, columns the events.
+
+    Returns:
+        np.ndarray: Array of risks to develop a mutation. Rows are
+            patients, columns events.
+    """
     occurences = np.zeros((data.shape[0], 12), dtype=int)
 
     model = mhn.model.oMHN(log_theta.reshape(13, 12))
@@ -27,7 +42,24 @@ def _sample_risks(log_theta, trajectory_num: int, data: pd.DataFrame):
 
 def event_risks(log_thetas: np.ndarray, data: pd.DataFrame,
                 n_samples: int | Literal["all"] = 1000,
-                trajectory_num: int = 100):
+                trajectory_num: int = 100) -> np.ndarray:
+    """Infer patients' risks to develop a mutation according to multiple
+    log_thetas
+
+    Args:
+        log_thetas (np.ndarray): Log thetas to base the predictions on.
+        data (pd.DataFrame): Patients for whom to predict the events.
+            Rows are patients, columns the events.
+        n_samples (int | Literal["all"], optional): How many samples to 
+            draw from the log_thetas. Can be "all". Defaults to 1000.
+        trajectory_num (int, optional): Trajectories to sample for each
+            log_theta to predict the risk. Defaults to 100.
+
+    Returns:
+        np.ndarray: Array of of shape (n_patients, n_samples, n_events)
+            Each cell contains the predicted risk to develop one event
+            according to one log_theta sample.
+    """
 
     patients_unique = data.drop_duplicates()
     n_events = data.shape[1]
@@ -55,8 +87,19 @@ def event_risks(log_thetas: np.ndarray, data: pd.DataFrame,
     return probs
 
 
-def _sample_positions(log_theta, trajectory_num: int, n_bins: int):
+def _sample_positions(log_theta: np.ndarray, trajectory_num: int, n_bins: int
+                      ) -> np.ndarray:
+    """Estimate the temporal event positions according to an MHN through
+    sampling.
 
+    Args:
+        log_theta (np.ndarray): Logarithmic theta values of the MHN.
+        trajectory_num (int): Number of trajectories to sample to infer
+            the risk.
+        n_bins (int): number of position bins.
+    Returns:
+        np.ndarray: Array (n_events, n_bins) of counts per bin.
+    """
     model = mhn.model.oMHN(log_theta.reshape(13, 12))
 
     position_counts = np.zeros((12, n_bins))
@@ -75,7 +118,22 @@ def _sample_positions(log_theta, trajectory_num: int, n_bins: int):
 
 def event_positions(log_thetas: np.ndarray,
                     n_samples: int | Literal["all"] = 100,
-                    trajectory_num: int = 50_000, n_bins: int = 100):
+                    trajectory_num: int = 50_000, n_bins: int = 100
+                    ) -> np.ndarray:
+    """Estimate the temporal event positions according to multiple MHNs.
+
+    Args:
+        log_thetas (np.ndarray): Log thetas to base the predictions on.
+        n_samples (int | Literal["all"], optional): How many samples to 
+            draw from the log_thetas. Can be "all". Defaults to 100.
+        trajectory_num (int, optional): Trajectories to sample for each
+            log_theta to predict the positions. Defaults to 50,000.
+        n_bins (int, optional): Number of position bins. Defaults to 100.
+
+    Returns:
+        np.ndarray: Array (n_samples, n_events, n_bins) of counts per
+            event, bin and log_theta sample.
+    """
 
     if n_samples == "all":
         n_samples = log_thetas.shape[0]
