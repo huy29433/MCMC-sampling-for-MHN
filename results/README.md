@@ -1,20 +1,11 @@
 # Results
 
-This directory contains the results of the scripts in `./mcmc_sampling` and of train
+This directory contains the sampling and plotting results as well as the trained MHN MLEs.
 
-The files are binary and can be opened in Python with
-```python
-import numpy as np
+## Contents
 
-chains = np.load(f"G13_LUAD_12_sym-l2_1se_p_mle_00015625.npy")
+This repository contains:
 
-print(type(chains))
->>> <class 'numpy.ndarray'>
-
-print(chains.shape)
->>> (10, 44000, 156)
-```
-
-Above example contains the results of 10 chains with 44000 steps each, where each step consists of a flattened 13 x 12 oMHN parameter matrix.
-
-TODO explain nomenclature
+- In [figs](figs) figures produced by the scripts in [../analysis](../analysis) and shown in the [manuscript](../docs/Quantifying_Uncertainty_of_Predictions_from_Cancer_Progression_Models.pdf).
+- In [mcmc](mcmc) the MCMC samples.
+- In [mhns](mhns) the trained MHN MLEs.
